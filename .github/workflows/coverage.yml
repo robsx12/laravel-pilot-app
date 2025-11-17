@@ -32,6 +32,17 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+          sed -i 's/SESSION_DRIVER=database/SESSION_DRIVER=array/' .env
+          sed -i 's/CACHE_STORE=database/CACHE_STORE=array/' .env
+          sed -i 's/QUEUE_CONNECTION=database/QUEUE_CONNECTION=sync/' .env
+
+      - name: Create SQLite database
+        working-directory: codebase/backend
+        run: touch database/database.sqlite
+
+      - name: Run migrations
+        working-directory: codebase/backend
+        run: php artisan migrate --force
 
       - name: Cache Laravel
         working-directory: codebase/backend
