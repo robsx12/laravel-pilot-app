@@ -55,35 +55,29 @@ jobs:
         working-directory: codebase/backend
         run: mkdir -p build/logs
 
-      - name: Run tests with Pest (generate Cobertura XML)
+      - name: Run tests with Pest (generate Clover XML)
         working-directory: codebase/backend
-        run: vendor/bin/pest --coverage --coverage-cobertura=build/logs/cobertura.xml
+        run: vendor/bin/pest --coverage --coverage-clover=build/logs/clover.xml
 
       - name: Verify coverage file exists
         working-directory: codebase/backend
         run: |
-          if [ ! -f build/logs/cobertura.xml ]; then
+          if [ ! -f build/logs/clover.xml ]; then
             echo "Coverage file not found!"
             exit 1
           fi
-          echo "Coverage file size: $(wc -c < build/logs/cobertura.xml) bytes"
-          echo "=== First 30 lines of coverage file ==="
-          head -30 build/logs/cobertura.xml
-
-      - name: Fix coverage file paths for Coveralls
-        working-directory: codebase/backend
-        run: |
-          # Replace relative paths with paths from repo root
-          # Paths in cobertura are relative to the app/ directory, so we need to add codebase/backend/app/
-          sed -i 's|filename="|filename="codebase/backend/app/|g' build/logs/cobertura.xml
-          echo "=== After path fix (first 30 lines) ==="
-          head -30 build/logs/cobertura.xml
+          echo "Coverage file size: $(wc -c < build/logs/clover.xml) bytes"
+          echo "=== First 50 lines of coverage file ==="
+          head -50 build/logs/clover.xml
+          echo ""
+          echo "=== File paths in coverage ==="
+          grep -o 'name="[^"]*\.php"' build/logs/clover.xml | head -20
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          format: cobertura
-          file: codebase/backend/build/logs/cobertura.xml
+          format: clover
+          file: codebase/backend/build/logs/clover.xml
+          base-path: codebase/backend
           flag-name: pest-tests
-          parallel: false
