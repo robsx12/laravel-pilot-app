@@ -51,9 +51,23 @@ jobs:
           php artisan config:cache
           php artisan route:cache || true
 
+      - name: Create coverage directory
+        working-directory: codebase/backend
+        run: mkdir -p build/logs
+
       - name: Run tests with Pest (generate Cobertura XML)
         working-directory: codebase/backend
         run: vendor/bin/pest --coverage --coverage-cobertura=build/logs/cobertura.xml
+
+      - name: Verify coverage file exists
+        working-directory: codebase/backend
+        run: |
+          if [ ! -f build/logs/cobertura.xml ]; then
+            echo "Coverage file not found!"
+            exit 1
+          fi
+          echo "Coverage file size: $(wc -c < build/logs/cobertura.xml) bytes"
+          head -20 build/logs/cobertura.xml
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
@@ -62,3 +76,5 @@ jobs:
           format: cobertura
           file: codebase/backend/build/logs/cobertura.xml
           base-path: codebase/backend
+          flag-name: pest-tests
+          parallel: false
