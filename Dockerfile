@@ -21,6 +21,12 @@ RUN install-php-extensions \
     bcmath \
     exif
 
+# Install Xdebug
+RUN apk add --no-cache --update --virtual buildDeps autoconf \
+    && apk add --no-cache --update linux-headers \
+    && pecl install -o -f xdebug \
+    && docker-php-ext-enable xdebug    
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

@@ -9,6 +9,7 @@ services:
       - "443:443"
     volumes:
       - ./codebase/backend:/app
+      - ./xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
     working_dir: /app
     environment:
       - SERVER_NAME=:8080
