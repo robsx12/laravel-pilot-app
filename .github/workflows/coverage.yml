@@ -67,7 +67,16 @@ jobs:
             exit 1
           fi
           echo "Coverage file size: $(wc -c < build/logs/cobertura.xml) bytes"
-          head -20 build/logs/cobertura.xml
+          echo "=== First 30 lines of coverage file ==="
+          head -30 build/logs/cobertura.xml
+
+      - name: Fix coverage file paths for Coveralls
+        working-directory: codebase/backend
+        run: |
+          # Replace relative paths with paths from repo root
+          sed -i 's|filename="|filename="codebase/backend/|g' build/logs/cobertura.xml
+          echo "=== After path fix (first 30 lines) ==="
+          head -30 build/logs/cobertura.xml
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
@@ -75,6 +84,5 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           format: cobertura
           file: codebase/backend/build/logs/cobertura.xml
-          base-path: codebase/backend
           flag-name: pest-tests
           parallel: false
