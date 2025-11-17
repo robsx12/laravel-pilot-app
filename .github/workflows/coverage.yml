@@ -74,7 +74,8 @@ jobs:
         working-directory: codebase/backend
         run: |
           # Replace relative paths with paths from repo root
-          sed -i 's|filename="|filename="codebase/backend/|g' build/logs/cobertura.xml
+          # Paths in cobertura are relative to the app/ directory, so we need to add codebase/backend/app/
+          sed -i 's|filename="|filename="codebase/backend/app/|g' build/logs/cobertura.xml
           echo "=== After path fix (first 30 lines) ==="
           head -30 build/logs/cobertura.xml
 
