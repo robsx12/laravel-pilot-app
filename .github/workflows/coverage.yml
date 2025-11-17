@@ -1,0 +1,53 @@
+# .github/workflows/coverage.yml
+name: Test & Coverage (Coveralls)
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, pdo_mysql, redis, zip, gd, intl, opcache, pcntl, bcmath, exif
+          tools: composer
+          coverage: xdebug
+
+      - name: Install dependencies
+        working-directory: codebase/backend
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare .env & app key
+        working-directory: codebase/backend
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Cache Laravel
+        working-directory: codebase/backend
+        run: |
+          php artisan config:clear
+          php artisan config:cache
+          php artisan route:cache || true
+
+      - name: Run tests with Pest (generate Cobertura XML)
+        working-directory: codebase/backend
+        run: vendor/bin/pest --coverage --coverage-cobertura=build/logs/cobertura.xml
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          format: cobertura
+          file: codebase/backend/build/logs/cobertura.xml
+          base-path: codebase/backend
