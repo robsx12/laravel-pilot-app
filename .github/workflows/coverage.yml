@@ -24,11 +24,9 @@ jobs:
           coverage: xdebug
 
       - name: Install dependencies
-        working-directory: codebase/backend
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Prepare .env & app key
-        working-directory: codebase/backend
         run: |
           cp .env.example .env
           php artisan key:generate
@@ -37,47 +35,29 @@ jobs:
           sed -i 's/QUEUE_CONNECTION=database/QUEUE_CONNECTION=sync/' .env
 
       - name: Create SQLite database
-        working-directory: codebase/backend
         run: touch database/database.sqlite
 
       - name: Run migrations
-        working-directory: codebase/backend
         run: php artisan migrate --force
 
       - name: Cache Laravel
-        working-directory: codebase/backend
         run: |
           php artisan config:clear
           php artisan config:cache
           php artisan route:cache || true
 
       - name: Create coverage directory
-        working-directory: codebase/backend
         run: mkdir -p build/logs
 
       - name: Run tests with Pest (generate Clover XML)
-        working-directory: codebase/backend
         run: vendor/bin/pest --coverage --coverage-clover=build/logs/clover.xml
-
-      - name: Verify coverage file exists
-        working-directory: codebase/backend
-        run: |
-          if [ ! -f build/logs/clover.xml ]; then
-            echo "Coverage file not found!"
-            exit 1
-          fi
-          echo "Coverage file size: $(wc -c < build/logs/clover.xml) bytes"
-          echo "=== First 50 lines of coverage file ==="
-          head -50 build/logs/clover.xml
-          echo ""
-          echo "=== File paths in coverage ==="
-          grep -o 'name="[^"]*\.php"' build/logs/clover.xml | head -20
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           format: clover
-          file: codebase/backend/build/logs/clover.xml
-          base-path: codebase/backend
+          file: build/logs/clover.xml
+          #file: codebase/backend/build/logs/clover.xml
+          #base-path: codebase/backend
           flag-name: pest-tests

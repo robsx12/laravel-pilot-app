@@ -26,10 +26,7 @@ RUN install-php-extensions \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /app
-
-# Copy application files
-COPY ./codebase/backend /app
+WORKDIR /app/codebase/backend
 
 # Set permissions
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
