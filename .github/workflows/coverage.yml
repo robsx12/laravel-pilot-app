@@ -2,8 +2,8 @@
 name: Test & Coverage (Coveralls)
 
 on:
-  push:
-    branches: [ master ]
+  #push:
+  #  branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -59,11 +59,19 @@ jobs:
         working-directory: codebase/backend
         run: vendor/bin/pest --coverage --coverage-clover=build/logs/clover.xml
 
-      - name: Upload coverage to Coveralls
-        uses: coverallsapp/github-action@v2
+#      - name: Upload coverage to Coveralls
+#        uses: coverallsapp/github-action@v2
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          format: clover
+#          file: codebase/backend/build/logs/clover.xml
+#          #base-path: codebase/backend
+#          flag-name: pest-tests
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://your-sonarqube-server.com
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          format: clover
-          file: codebase/backend/build/logs/clover.xml
-          #base-path: codebase/backend
-          flag-name: pest-tests
+          projectBaseDir: codebase/backend
