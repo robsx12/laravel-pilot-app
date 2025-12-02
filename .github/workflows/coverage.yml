@@ -65,5 +65,4 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           format: clover
           file: codebase/backend/build/logs/clover.xml
-          #base-path: codebase/backend
           flag-name: pest-tests
