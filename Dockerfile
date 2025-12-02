@@ -20,7 +20,7 @@ RUN install-php-extensions \
     pcntl \
     bcmath \
     exif \
-    xdebug    
+    xdebug
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
